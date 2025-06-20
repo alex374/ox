@@ -1,4 +1,124 @@
-# AI Design Agent 使用指南
+# 使用指南
+
+## 项目概述
+
+AI 设计师助手是一个基于 React + TypeScript 的 Web 应用，集成了 AI 聊天和图片生成功能，帮助用户进行 UI/UX 设计。
+
+## 功能特性
+
+- **AI 聊天对话**：基于 OpenRouter API 的智能设计师助手
+- **实时图片生成**：使用 OpenAI DALL-E API 生成设计稿
+- **设计卡片管理**：自动生成和管理设计作品
+- **响应式界面**：适配各种设备的现代化 UI
+
+## 环境配置
+
+### 1. 复制环境变量文件
+```bash
+cp .env.example .env
+```
+
+### 2. 配置 API 密钥
+
+在 `.env` 文件中配置以下密钥：
+
+```env
+# OpenRouter API Key (必需)
+# 用于聊天功能，获取地址：https://openrouter.ai
+VITE_OPENROUTER_API_KEY=your_openrouter_api_key_here
+
+# OpenAI API Key (可选)
+# 用于 DALL-E 图片生成，获取地址：https://platform.openai.com
+VITE_OPENAI_API_KEY=your_openai_api_key_here
+```
+
+**注意**：
+- OpenRouter API 密钥是必需的，用于基本的聊天功能
+- OpenAI API 密钥是可选的，用于真实的图片生成功能
+- 如果没有提供 OpenAI API 密钥，系统会使用模拟图片作为备选方案
+
+## 运行项目
+
+### 开发模式
+```bash
+npm run dev
+```
+
+### 生产构建
+```bash
+npm run build
+npm run preview
+```
+
+## 使用说明
+
+### 1. 设置 API 密钥
+
+首次使用时，请点击设置按钮配置 API 密钥：
+- 输入 OpenRouter API 密钥（必需）
+- 输入 OpenAI API 密钥（可选，用于图片生成）
+
+### 2. 开始对话
+
+在聊天界面中描述您的设计需求，例如：
+- "设计一个现代化的登录页面"
+- "创建一个移动端电商应用的首页"
+- "生成一个仪表板界面设计"
+
+### 3. 图片生成
+
+当您的对话包含设计相关的关键词时，系统会自动：
+1. 使用 OpenAI DALL-E API 生成相关的设计稿图片
+2. 如果 OpenAI API 不可用，则使用模拟图片作为备选
+3. 将生成的设计卡片添加到设计画廊中
+
+### 4. 设计管理
+
+- 所有生成的设计稿会自动保存到设计画廊
+- 可以查看设计稿的详细信息和生成时间
+- 支持响应式布局，适配不同设备
+
+## 技术栈
+
+- **前端框架**：React 18 + TypeScript
+- **构建工具**：Vite
+- **样式框架**：Tailwind CSS
+- **AI 服务**：OpenRouter API (聊天) + OpenAI API (图片生成)
+- **HTTP 客户端**：Axios
+- **图标库**：Lucide React
+
+## API 集成说明
+
+### OpenRouter API
+- 用于处理聊天对话
+- 支持多种 AI 模型
+- 提供专业的设计建议
+
+### OpenAI DALL-E API
+- 用于生成真实的设计稿图片
+- 支持高质量图片生成
+- 自动优化提示词以生成更好的设计稿
+
+## 故障排除
+
+### 1. 图片生成失败
+- 检查 OpenAI API 密钥是否正确
+- 确认 API 配额是否充足
+- 系统会自动回退到模拟图片
+
+### 2. 聊天功能不可用
+- 检查 OpenRouter API 密钥是否正确
+- 确认网络连接正常
+
+### 3. 构建错误
+```bash
+npm install
+npm run build
+```
+
+## 许可证
+
+本项目基于 MIT 许可证开源。
 
 ## 第一次运行项目
 
