@@ -16,10 +16,10 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
     error: null
   });
   
-  const [apiKey, setApiKey] = useState<string>('');
+  const [openrouterApiKey, setOpenrouterApiKey] = useState<string>('');
+  const [openaiApiKey, setOpenaiApiKey] = useState<string>('');
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const apiService = new APIService(apiKey);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,6 +45,7 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
     }));
 
     try {
+      const apiService = new APIService(openrouterApiKey, openaiApiKey);
       const response = await apiService.sendMessage(content);
       
       const assistantMessage: Message = {
@@ -97,10 +98,10 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
             <p>• 分析设计趋势和最佳实践</p>
           </div>
           
-          {!apiKey && (
+          {!openrouterApiKey && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
               <p className="text-yellow-800 text-sm mb-2">
-                请先设置 OpenRouter API 密钥
+                请先设置 API 密钥
               </p>
               <button
                 onClick={() => setShowSettings(true)}
@@ -115,7 +116,7 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
         
         <ChatInput 
           onSendMessage={handleSendMessage}
-          disabled={!apiKey}
+          disabled={!openrouterApiKey}
           isLoading={chatState.isLoading}
         />
         
@@ -127,17 +128,32 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
               <form onSubmit={handleSettingsSubmit}>
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    OpenRouter API 密钥
+                    OpenRouter API 密钥 (必需)
                   </label>
                   <input
                     type="password"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
+                    value={openrouterApiKey}
+                    onChange={(e) => setOpenrouterApiKey(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="输入您的 OpenRouter API 密钥"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    您可以在 <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-blue-500">OpenRouter</a> 获取 API 密钥
+                    用于聊天功能，您可以在 <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-blue-500">OpenRouter</a> 获取
+                  </p>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    OpenAI API 密钥 (可选)
+                  </label>
+                  <input
+                    type="password"
+                    value={openaiApiKey}
+                    onChange={(e) => setOpenaiApiKey(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="输入您的 OpenAI API 密钥"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    用于 DALL-E 图片生成，您可以在 <a href="https://platform.openai.com" target="_blank" rel="noopener noreferrer" className="text-blue-500">OpenAI Platform</a> 获取
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -215,7 +231,7 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
       
       <ChatInput 
         onSendMessage={handleSendMessage}
-        disabled={!apiKey}
+        disabled={!openrouterApiKey}
         isLoading={chatState.isLoading}
       />
       
@@ -227,17 +243,32 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
             <form onSubmit={handleSettingsSubmit}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  OpenRouter API 密钥
+                  OpenRouter API 密钥 (必需)
                 </label>
                 <input
                   type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
+                  value={openrouterApiKey}
+                  onChange={(e) => setOpenrouterApiKey(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="输入您的 OpenRouter API 密钥"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  您可以在 <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-blue-500">OpenRouter</a> 获取 API 密钥
+                  用于聊天功能，您可以在 <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-blue-500">OpenRouter</a> 获取
+                </p>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  OpenAI API 密钥 (可选)
+                </label>
+                <input
+                  type="password"
+                  value={openaiApiKey}
+                  onChange={(e) => setOpenaiApiKey(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="输入您的 OpenAI API 密钥"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  用于 DALL-E 图片生成，您可以在 <a href="https://platform.openai.com" target="_blank" rel="noopener noreferrer" className="text-blue-500">OpenAI Platform</a> 获取
                 </p>
               </div>
               <div className="flex gap-2">
