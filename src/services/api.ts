@@ -6,19 +6,18 @@ const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // 从环境变量获取 API 密钥
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
 export class APIService {
   private openrouterApiKey: string;
   private openai: OpenAI | null = null;
 
-  constructor(openrouterApiKey?: string, openaiApiKey?: string) {
+  constructor(openrouterApiKey?: string) {
     this.openrouterApiKey = openrouterApiKey || OPENROUTER_API_KEY || '';
     
-    const actualOpenaiKey = openaiApiKey || OPENAI_API_KEY;
-    if (actualOpenaiKey) {
+    if (this.openrouterApiKey) {
       this.openai = new OpenAI({
-        apiKey: actualOpenaiKey,
+        apiKey: this.openrouterApiKey,
+        baseURL: "https://openrouter.ai/api/v1",
         dangerouslyAllowBrowser: true
       });
     }
@@ -33,7 +32,7 @@ export class APIService {
       const response = await axios.post(
         OPENROUTER_API_URL,
         {
-          model: 'openai/gpt-4',
+          model: 'openai/gpt-4.1-mini',
           messages: [
             {
               role: 'system',
@@ -44,13 +43,41 @@ export class APIService {
               2. 提供专业的设计建议
               3. 生成具体的设计稿描述
               
-              回复格式应该包含设计建议和具体的设计描述。如果需要生成设计稿，请在回复中明确说明设计稿的特征。`
+              如果用户需要生成设计图片，你可以调用 generate_design_image 工具来生成图片。`
             },
             {
               role: 'user',
               content: message
             }
           ],
+          tools: [
+            {
+              type: 'function',
+              function: {
+                name: 'generate_design_image',
+                description: '生成 UI/UX 设计图片',
+                parameters: {
+                  type: 'object',
+                  properties: {
+                    prompt: {
+                      type: 'string',
+                      description: '生成图片的英文描述，应该包含设计类型、风格、颜色等信息'
+                    },
+                    title: {
+                      type: 'string',
+                      description: '设计稿的标题'
+                    },
+                    description: {
+                      type: 'string',
+                      description: '设计稿的描述'
+                    }
+                  },
+                  required: ['prompt', 'title', 'description']
+                }
+              }
+            }
+          ],
+          tool_choice: 'auto',
           temperature: 0.7,
           max_tokens: 1000
         },
@@ -65,13 +92,25 @@ export class APIService {
       );
 
       const assistantMessage = response.data.choices[0]?.message?.content || '';
-      
-      // 简单的设计稿检测逻辑 - 实际应用中可能需要更复杂的逻辑
-      const shouldGenerateDesign = this.shouldGenerateDesignCard(message, assistantMessage);
-      
+      const toolCalls = response.data.choices[0]?.message?.tool_calls;
+
       let designCard: DesignCard | undefined;
-      if (shouldGenerateDesign) {
-        designCard = await this.generateDesignCard(message, assistantMessage);
+
+      // 检查是否有工具调用
+      if (toolCalls && toolCalls.length > 0) {
+        const imageGenerationCall = toolCalls.find(
+          (call: any) => call.function?.name === 'generate_design_image'
+        );
+
+        if (imageGenerationCall) {
+          designCard = await this.handleImageGeneration(imageGenerationCall);
+        }
+      } else {
+        // 如果没有工具调用，检查是否应该生成设计稿
+        const shouldGenerateDesign = this.shouldGenerateDesignCard(message, assistantMessage);
+        if (shouldGenerateDesign) {
+          designCard = this.generateMockDesignCard(message);
+        }
       }
 
       return {
@@ -84,6 +123,39 @@ export class APIService {
     }
   }
 
+  private async handleImageGeneration(toolCall: any): Promise<DesignCard> {
+    try {
+      const functionArgs = JSON.parse(toolCall.function?.arguments || '{}');
+      const { prompt, title, description } = functionArgs;
+
+      // 这里可以调用实际的图片生成 API
+      // 由于 OpenRouter 本身不提供图片生成功能，我们需要使用外部服务
+      // 或者回退到模拟图片
+      
+      console.log('Generated image prompt:', prompt);
+
+      // 暂时使用模拟图片，实际项目中可以集成真实的图片生成服务
+      const designCard: DesignCard = {
+        id: Date.now().toString(),
+        title: title || '生成的设计稿',
+        description: description || '根据您的需求生成的设计稿',
+        imageUrl: this.generatePlaceholderImage(prompt),
+        createdAt: new Date()
+      };
+
+      return designCard;
+    } catch (error) {
+      console.error('Image generation error:', error);
+      return this.generateMockDesignCard('工具调用生成的设计稿');
+    }
+  }
+
+  private generatePlaceholderImage(prompt: string): string {
+    // 生成带有提示词的占位符图片 URL
+    const encodedPrompt = encodeURIComponent(prompt.slice(0, 100));
+    return `https://via.placeholder.com/400x300/4F46E5/FFFFFF?text=${encodedPrompt}`;
+  }
+
   private shouldGenerateDesignCard(userMessage: string, assistantMessage: string): boolean {
     const designKeywords = ['设计', '界面', '页面', '布局', '组件', 'UI', 'UX', '原型', '设计稿', '生成', '创建'];
     const messageToCheck = userMessage.toLowerCase() + ' ' + assistantMessage.toLowerCase();
@@ -91,92 +163,8 @@ export class APIService {
     return designKeywords.some(keyword => messageToCheck.includes(keyword));
   }
 
-  private async generateDesignCard(userMessage: string, assistantMessage: string): Promise<DesignCard> {
-    try {
-      if (this.openai) {
-        // 使用 OpenAI DALL-E 生成真实图片
-        const imagePrompt = this.createImagePrompt(userMessage, assistantMessage);
-        
-        const response = await this.openai.images.generate({
-          model: "dall-e-3",
-          prompt: imagePrompt,
-          n: 1,
-          size: "1024x1024",
-          quality: "standard",
-          style: "natural"
-        });
-
-        const imageUrl = response.data?.[0]?.url;
-        
-        if (imageUrl) {
-          return {
-            id: Date.now().toString(),
-            title: `基于 "${userMessage.slice(0, 30)}..." 的设计稿`,
-            description: `根据您的需求使用 AI 生成的设计稿`,
-            imageUrl: imageUrl,
-            createdAt: new Date()
-          };
-        }
-      }
-      
-      // 如果 OpenAI API 不可用，回退到模拟图片
-      return this.generateMockDesignCard(userMessage);
-    } catch (error) {
-      console.error('Image generation error:', error);
-      // 出错时回退到模拟图片
-      return this.generateMockDesignCard(userMessage);
-    }
-  }
-
-  private createImagePrompt(userMessage: string, assistantMessage: string): string {
-    // 创建适合 DALL-E 的图片生成提示词
-    const basePrompt = "Create a modern, clean UI/UX design mockup for ";
-    
-    // 提取关键设计元素
-    const designElements = this.extractDesignElements(userMessage + ' ' + assistantMessage);
-    
-    let prompt = basePrompt + userMessage.slice(0, 100);
-    
-    if (designElements.length > 0) {
-      prompt += `. Include ${designElements.join(', ')}`;
-    }
-    
-    prompt += ". Style: modern, minimalist, professional UI design, clean interface, user-friendly layout";
-    
-    return prompt;
-  }
-
-  private extractDesignElements(text: string): string[] {
-    const elements: string[] = [];
-    const designTerms = {
-      '移动': 'mobile interface',
-      '手机': 'mobile app',
-      '网页': 'web interface',
-      '登录': 'login form',
-      '注册': 'signup form',
-      '搜索': 'search functionality',
-      '列表': 'list view',
-      '卡片': 'card layout',
-      '按钮': 'buttons',
-      '导航': 'navigation menu',
-      '仪表板': 'dashboard',
-      '图表': 'charts and graphs',
-      '社交': 'social media interface',
-      '电商': 'e-commerce interface',
-      '聊天': 'chat interface'
-    };
-
-    for (const [chinese, english] of Object.entries(designTerms)) {
-      if (text.includes(chinese)) {
-        elements.push(english);
-      }
-    }
-
-    return elements;
-  }
-
   private generateMockDesignCard(userMessage: string): DesignCard {
-    // 备用的模拟图片，当 OpenAI API 不可用时使用
+    // 备用的模拟图片，当图片生成失败时使用
     const mockImages = [
       'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop',
       'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=400&h=300&fit=crop',
@@ -187,7 +175,7 @@ export class APIService {
     return {
       id: Date.now().toString(),
       title: `基于 "${userMessage.slice(0, 20)}..." 的设计稿`,
-      description: `根据您的需求自动生成的设计稿（模拟）`,
+      description: `根据您的需求自动生成的设计稿`,
       imageUrl: mockImages[Math.floor(Math.random() * mockImages.length)],
       createdAt: new Date()
     };

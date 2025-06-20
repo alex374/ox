@@ -17,7 +17,6 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
   });
   
   const [openrouterApiKey, setOpenrouterApiKey] = useState<string>('');
-  const [openaiApiKey, setOpenaiApiKey] = useState<string>('');
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -45,7 +44,7 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
     }));
 
     try {
-      const apiService = new APIService(openrouterApiKey, openaiApiKey);
+      const apiService = new APIService(openrouterApiKey);
       const response = await apiService.sendMessage(content);
       
       const assistantMessage: Message = {
@@ -139,21 +138,6 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     用于聊天功能，您可以在 <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-blue-500">OpenRouter</a> 获取
-                  </p>
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    OpenAI API 密钥 (可选)
-                  </label>
-                  <input
-                    type="password"
-                    value={openaiApiKey}
-                    onChange={(e) => setOpenaiApiKey(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="输入您的 OpenAI API 密钥"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    用于 DALL-E 图片生成，您可以在 <a href="https://platform.openai.com" target="_blank" rel="noopener noreferrer" className="text-blue-500">OpenAI Platform</a> 获取
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -254,21 +238,6 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   用于聊天功能，您可以在 <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-blue-500">OpenRouter</a> 获取
-                </p>
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  OpenAI API 密钥 (可选)
-                </label>
-                <input
-                  type="password"
-                  value={openaiApiKey}
-                  onChange={(e) => setOpenaiApiKey(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="输入您的 OpenAI API 密钥"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  用于 DALL-E 图片生成，您可以在 <a href="https://platform.openai.com" target="_blank" rel="noopener noreferrer" className="text-blue-500">OpenAI Platform</a> 获取
                 </p>
               </div>
               <div className="flex gap-2">

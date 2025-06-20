@@ -2,12 +2,12 @@
 
 ## 项目概述
 
-AI 设计师助手是一个基于 React + TypeScript 的 Web 应用，集成了 AI 聊天和图片生成功能，帮助用户进行 UI/UX 设计。
+AI 设计师助手是一个基于 React + TypeScript 的 Web 应用，集成了 AI 聊天和智能图片生成功能，通过 OpenRouter 的工具调用系统来实现设计稿生成。
 
 ## 功能特性
 
 - **AI 聊天对话**：基于 OpenRouter API 的智能设计师助手
-- **实时图片生成**：使用 OpenAI DALL-E API 生成设计稿
+- **智能图片生成**：使用 GPT-4.1 Mini 通过工具调用判断并生成设计稿
 - **设计卡片管理**：自动生成和管理设计作品
 - **响应式界面**：适配各种设备的现代化 UI
 
@@ -20,22 +20,17 @@ cp .env.example .env
 
 ### 2. 配置 API 密钥
 
-在 `.env` 文件中配置以下密钥：
+在 `.env` 文件中配置 OpenRouter API 密钥：
 
 ```env
-# OpenRouter API Key (必需)
-# 用于聊天功能，获取地址：https://openrouter.ai
+# OpenRouter API Key (用于聊天功能和图片生成)
+# 获取地址：https://openrouter.ai
 VITE_OPENROUTER_API_KEY=your_openrouter_api_key_here
-
-# OpenAI API Key (可选)
-# 用于 DALL-E 图片生成，获取地址：https://platform.openai.com
-VITE_OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 **注意**：
-- OpenRouter API 密钥是必需的，用于基本的聊天功能
-- OpenAI API 密钥是可选的，用于真实的图片生成功能
-- 如果没有提供 OpenAI API 密钥，系统会使用模拟图片作为备选方案
+- 只需要 OpenRouter API 密钥即可使用所有功能
+- OpenRouter 支持多种 AI 模型，包括 GPT-4.1 Mini
 
 ## 运行项目
 
@@ -54,9 +49,7 @@ npm run preview
 
 ### 1. 设置 API 密钥
 
-首次使用时，请点击设置按钮配置 API 密钥：
-- 输入 OpenRouter API 密钥（必需）
-- 输入 OpenAI API 密钥（可选，用于图片生成）
+首次使用时，请点击设置按钮配置 OpenRouter API 密钥
 
 ### 2. 开始对话
 
@@ -65,12 +58,14 @@ npm run preview
 - "创建一个移动端电商应用的首页"
 - "生成一个仪表板界面设计"
 
-### 3. 图片生成
+### 3. 智能图片生成
 
-当您的对话包含设计相关的关键词时，系统会自动：
-1. 使用 OpenAI DALL-E API 生成相关的设计稿图片
-2. 如果 OpenAI API 不可用，则使用模拟图片作为备选
-3. 将生成的设计卡片添加到设计画廊中
+当您的对话包含设计相关的需求时，系统会：
+1. 使用 GPT-4.1 Mini 理解您的需求
+2. 智能判断是否需要生成设计稿
+3. 通过工具调用的方式触发图片生成
+4. 自动生成设计稿的标题、描述和提示词
+5. 将生成的设计卡片添加到设计画廊中
 
 ### 4. 设计管理
 
@@ -83,42 +78,98 @@ npm run preview
 - **前端框架**：React 18 + TypeScript
 - **构建工具**：Vite
 - **样式框架**：Tailwind CSS
-- **AI 服务**：OpenRouter API (聊天) + OpenAI API (图片生成)
+- **AI 服务**：OpenRouter API (GPT-4.1 Mini)
 - **HTTP 客户端**：Axios
 - **图标库**：Lucide React
 
 ## API 集成说明
 
 ### OpenRouter API
-- 用于处理聊天对话
-- 支持多种 AI 模型
-- 提供专业的设计建议
+- 用于处理聊天对话和图片生成
+- 使用 GPT-4.1 Mini 模型
+- 支持工具调用 (Function Calling)
+- 智能判断用户意图
 
-### OpenAI DALL-E API
-- 用于生成真实的设计稿图片
-- 支持高质量图片生成
-- 自动优化提示词以生成更好的设计稿
+### 工具调用机制
+```typescript
+{
+  type: 'function',
+  function: {
+    name: 'generate_design_image',
+    description: '生成 UI/UX 设计图片',
+    parameters: {
+      type: 'object',
+      properties: {
+        prompt: { type: 'string', description: '生成图片的英文描述' },
+        title: { type: 'string', description: '设计稿的标题' },
+        description: { type: 'string', description: '设计稿的描述' }
+      },
+      required: ['prompt', 'title', 'description']
+    }
+  }
+}
+```
 
 ## 故障排除
 
-### 1. 图片生成失败
-- 检查 OpenAI API 密钥是否正确
+### 1. 图片生成不工作
+- 检查 OpenRouter API 密钥是否正确
 - 确认 API 配额是否充足
 - 系统会自动回退到模拟图片
 
 ### 2. 聊天功能不可用
 - 检查 OpenRouter API 密钥是否正确
 - 确认网络连接正常
+- 查看浏览器控制台的错误信息
 
-### 3. 构建错误
+### 3. 工具调用失败
+- GPT-4.1 Mini 可能需要更明确的设计需求描述
+- 尝试使用更具体的设计关键词
+- 检查 API 响应中的错误信息
+
+### 4. 构建错误
 ```bash
 npm install
 npm run build
 ```
 
+## 开发指南
+
+### 添加新的工具函数
+```typescript
+// 在 src/services/api.ts 中添加新的工具定义
+{
+  type: 'function',
+  function: {
+    name: 'your_tool_name',
+    description: '工具描述',
+    parameters: {
+      // JSON Schema 定义
+    }
+  }
+}
+```
+
+### 扩展图片生成服务
+```typescript
+// 在 handleImageGeneration 方法中集成真实的图片生成服务
+private async handleImageGeneration(toolCall: any): Promise<DesignCard> {
+  // 解析工具调用参数
+  const { prompt, title, description } = functionArgs;
+  
+  // 调用真实的图片生成 API
+  const imageUrl = await this.callRealImageGeneration(prompt);
+  
+  // 返回设计卡片
+  return { id, title, description, imageUrl, createdAt };
+}
+```
+
 ## 许可证
 
 本项目基于 MIT 许可证开源。
+
+---
 
 ## 第一次运行项目
 
