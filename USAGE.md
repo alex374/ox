@@ -2,12 +2,13 @@
 
 ## 项目概述
 
-AI 设计师助手是一个基于 React + TypeScript 的 Web 应用，集成了 AI 聊天和智能图片生成功能，通过 OpenRouter 的工具调用系统来实现设计稿生成。
+AI 设计师助手是一个基于 React + TypeScript 的 Web 应用，采用混合 API 架构：使用 OpenRouter 处理聊天对话，使用 OpenAI DALL-E 生成真实的设计稿图片。
 
 ## 功能特性
 
 - **AI 聊天对话**：基于 OpenRouter API 的智能设计师助手
-- **智能图片生成**：使用 GPT-4.1 Mini 通过工具调用判断并生成设计稿
+- **真实图片生成**：使用 OpenAI DALL-E-3 生成高质量设计稿
+- **智能双模式**：有 OpenAI API 时生成真实图片，无 API 时使用模拟图片
 - **设计卡片管理**：自动生成和管理设计作品
 - **响应式界面**：适配各种设备的现代化 UI
 
@@ -20,17 +21,22 @@ cp .env.example .env
 
 ### 2. 配置 API 密钥
 
-在 `.env` 文件中配置 OpenRouter API 密钥：
+在 `.env` 文件中配置以下密钥：
 
 ```env
-# OpenRouter API Key (用于聊天功能和图片生成)
+# OpenRouter API Key (必需 - 用于聊天功能)
 # 获取地址：https://openrouter.ai
 VITE_OPENROUTER_API_KEY=your_openrouter_api_key_here
+
+# OpenAI API Key (可选 - 用于 DALL-E 图片生成)
+# 获取地址：https://platform.openai.com
+VITE_OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 **注意**：
-- 只需要 OpenRouter API 密钥即可使用所有功能
-- OpenRouter 支持多种 AI 模型，包括 GPT-4.1 Mini
+- OpenRouter API 密钥是必需的，用于基本的聊天功能
+- OpenAI API 密钥是可选的，用于真实的图片生成功能
+- 如果没有提供 OpenAI API 密钥，系统会使用高质量的模拟图片作为备选方案
 
 ## 运行项目
 
@@ -49,7 +55,9 @@ npm run preview
 
 ### 1. 设置 API 密钥
 
-首次使用时，请点击设置按钮配置 OpenRouter API 密钥
+首次使用时，请点击设置按钮配置 API 密钥：
+- 输入 OpenRouter API 密钥（必需，用于聊天）
+- 输入 OpenAI API 密钥（可选，用于图片生成）
 
 ### 2. 开始对话
 
@@ -61,10 +69,10 @@ npm run preview
 ### 3. 智能图片生成
 
 当您的对话包含设计相关的需求时，系统会：
-1. 使用 GPT-4.1 Mini 理解您的需求
+1. 使用 OpenRouter GPT-4.1 Mini 理解您的需求
 2. 智能判断是否需要生成设计稿
-3. 通过工具调用的方式触发图片生成
-4. 自动生成设计稿的标题、描述和提示词
+3. 自动将中文需求转换为英文提示词
+4. 调用 OpenAI DALL-E-3 生成真实的设计稿图片
 5. 将生成的设计卡片添加到设计画廊中
 
 ### 4. 设计管理
@@ -78,54 +86,61 @@ npm run preview
 - **前端框架**：React 18 + TypeScript
 - **构建工具**：Vite
 - **样式框架**：Tailwind CSS
-- **AI 服务**：OpenRouter API (GPT-4.1 Mini)
+- **聊天服务**：OpenRouter API (GPT-4.1 Mini)
+- **图片生成**：OpenAI API (DALL-E-3)
 - **HTTP 客户端**：Axios
 - **图标库**：Lucide React
 
 ## API 集成说明
 
+### 混合架构设计
+```
+用户输入 → OpenRouter (聊天) → 智能判断 → OpenAI (图片生成) → 设计卡片
+```
+
 ### OpenRouter API
-- 用于处理聊天对话和图片生成
+- 用于处理聊天对话
 - 使用 GPT-4.1 Mini 模型
-- 支持工具调用 (Function Calling)
+- 提供专业的设计建议
 - 智能判断用户意图
 
-### 工具调用机制
+### OpenAI DALL-E API
+- 用于生成真实的设计稿图片
+- 支持高质量图片生成
+- 自动优化提示词以生成更好的设计稿
+- 1024x1024 高分辨率输出
+
+### 智能提示词转换
+系统支持中文设计术语的自动映射：
 ```typescript
-{
-  type: 'function',
-  function: {
-    name: 'generate_design_image',
-    description: '生成 UI/UX 设计图片',
-    parameters: {
-      type: 'object',
-      properties: {
-        prompt: { type: 'string', description: '生成图片的英文描述' },
-        title: { type: 'string', description: '设计稿的标题' },
-        description: { type: 'string', description: '设计稿的描述' }
-      },
-      required: ['prompt', 'title', 'description']
-    }
-  }
-}
+const designTerms = {
+  '移动': 'mobile interface',
+  '手机': 'mobile app',
+  '网页': 'web interface',
+  '登录': 'login form',
+  '仪表板': 'dashboard',
+  '电商': 'e-commerce interface',
+  // 更多映射...
+};
 ```
 
 ## 故障排除
 
-### 1. 图片生成不工作
-- 检查 OpenRouter API 密钥是否正确
-- 确认 API 配额是否充足
-- 系统会自动回退到模拟图片
-
-### 2. 聊天功能不可用
+### 1. 聊天功能不可用
 - 检查 OpenRouter API 密钥是否正确
 - 确认网络连接正常
 - 查看浏览器控制台的错误信息
 
-### 3. 工具调用失败
-- GPT-4.1 Mini 可能需要更明确的设计需求描述
-- 尝试使用更具体的设计关键词
-- 检查 API 响应中的错误信息
+### 2. 图片生成失败
+- 检查 OpenAI API 密钥是否正确
+- 确认 API 配额是否充足
+- 系统会自动回退到模拟图片
+- 查看控制台的详细错误信息
+
+### 3. 提示词优化建议
+- 使用更具体的设计描述
+- 包含更多设计相关的关键词
+- 描述期望的界面风格和功能
 
 ### 4. 构建错误
 ```bash
@@ -133,35 +148,53 @@ npm install
 npm run build
 ```
 
+## 成本控制
+
+### OpenRouter 成本
+- 按 token 使用量计费
+- 聊天对话成本相对较低
+- 支持多种模型选择
+
+### OpenAI 成本
+- 按图片数量计费
+- DALL-E-3: $0.040 per image (1024×1024)
+- 建议设置使用限制和监控
+
 ## 开发指南
 
-### 添加新的工具函数
+### 扩展设计术语映射
 ```typescript
-// 在 src/services/api.ts 中添加新的工具定义
-{
-  type: 'function',
-  function: {
-    name: 'your_tool_name',
-    description: '工具描述',
-    parameters: {
-      // JSON Schema 定义
-    }
-  }
+// 在 src/services/api.ts 中的 extractDesignElements 方法
+private extractDesignElements(text: string): string[] {
+  const designTerms = {
+    // 添加新的中英文映射
+    '新术语': 'new_term',
+  };
 }
 ```
 
-### 扩展图片生成服务
+### 调整图片生成参数
 ```typescript
-// 在 handleImageGeneration 方法中集成真实的图片生成服务
-private async handleImageGeneration(toolCall: any): Promise<DesignCard> {
-  // 解析工具调用参数
-  const { prompt, title, description } = functionArgs;
-  
-  // 调用真实的图片生成 API
-  const imageUrl = await this.callRealImageGeneration(prompt);
-  
-  // 返回设计卡片
-  return { id, title, description, imageUrl, createdAt };
+// 在 generateDesignCard 方法中调整 DALL-E 参数
+const response = await this.openai.images.generate({
+  model: "dall-e-3",
+  prompt: imagePrompt,
+  n: 1,
+  size: "1024x1024",      // 可选: "1024x1024", "1792x1024", "1024x1792"
+  quality: "standard",    // 可选: "standard", "hd"
+  style: "natural"        // 可选: "natural", "vivid"
+});
+```
+
+### 添加新的设计类型检测
+```typescript
+// 在 shouldGenerateDesignCard 方法中添加新关键词
+private shouldGenerateDesignCard(userMessage: string, assistantMessage: string): boolean {
+  const designKeywords = [
+    '设计', '界面', '页面', '布局', '组件', 'UI', 'UX', 
+    '原型', '设计稿', '生成', '创建',
+    // 添加新的关键词...
+  ];
 }
 ```
 
