@@ -4,6 +4,7 @@ import { APIService } from '../services/api';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import { MessageCircle, Settings, Sparkles, Zap, Lightbulb, Layers, TrendingUp } from 'lucide-react';
+import { useNotify } from './NotificationProvider';
 
 interface ChatProps {
   onDesignCardCreated?: (designCard: DesignCard) => void;
@@ -20,6 +21,7 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
   const [openaiApiKey, setOpenaiApiKey] = useState<string>('');
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const notify = useNotify();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -33,11 +35,22 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
   useEffect(() => {
     const savedOpenRouterKey = localStorage.getItem('openrouter-api-key');
     const savedOpenAIKey = localStorage.getItem('openai-api-key');
-    if (savedOpenRouterKey) setOpenrouterApiKey(savedOpenRouterKey);
-    if (savedOpenAIKey) setOpenaiApiKey(savedOpenAIKey);
-  }, []);
+    if (savedOpenRouterKey) {
+      setOpenrouterApiKey(savedOpenRouterKey);
+      notify.info('API 密钥已加载', 'OpenRouter API 密钥已从本地存储加载');
+    }
+    if (savedOpenAIKey) {
+      setOpenaiApiKey(savedOpenAIKey);
+    }
+  }, [notify]);
 
   const handleSendMessage = async (content: string) => {
+    if (!openrouterApiKey) {
+      notify.warning('需要设置 API 密钥', '请先配置 OpenRouter API 密钥才能开始聊天');
+      setShowSettings(true);
+      return;
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
@@ -73,22 +86,58 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
       // 如果生成了设计稿，通知父组件
       if (response.designCard) {
         onDesignCardCreated?.(response.designCard);
+        notify.success('设计稿已生成', '新的设计稿已添加到画廊中');
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setChatState(prev => ({
         ...prev,
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: errorMessage
       }));
+      
+      // 提供具体的错误通知
+      if (errorMessage.includes('API')) {
+        notify.error('API 调用失败', '请检查您的 API 密钥是否正确', {
+          label: '检查设置',
+          onClick: () => setShowSettings(true)
+        });
+      } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+        notify.error('网络连接失败', '请检查您的网络连接并重试');
+      } else {
+        notify.error('发送消息失败', errorMessage);
+      }
     }
   };
 
   const handleSettingsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!openrouterApiKey.trim()) {
+      notify.warning('缺少必需的 API 密钥', 'OpenRouter API 密钥是必需的');
+      return;
+    }
+    
     // 保存API密钥到本地存储
     localStorage.setItem('openrouter-api-key', openrouterApiKey);
     localStorage.setItem('openai-api-key', openaiApiKey);
+    
     setShowSettings(false);
+    
+    if (openaiApiKey) {
+      notify.success('设置已保存', 'API 密钥已保存，现在可以使用所有功能了');
+    } else {
+      notify.success('设置已保存', 'OpenRouter API 密钥已保存，聊天功能已激活');
+    }
+  };
+
+  const clearMessages = () => {
+    setChatState(prev => ({
+      ...prev,
+      messages: [],
+      error: null
+    }));
+    notify.info('聊天记录已清空', '所有消息已被删除');
   };
 
   // 加载状态骨架屏
@@ -200,13 +249,24 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
         {showSettings && (
           <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
             <div className="modal-gradient w-full max-w-md animate-slide-in-up">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <Settings size={20} className="text-white" />
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <Settings size={20} className="text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-primary">
+                    API 设置
+                  </h3>
                 </div>
-                <h3 className="text-xl font-bold text-primary">
-                  API 设置
-                </h3>
+                {chatState.messages.length > 0 && (
+                  <button
+                    onClick={clearMessages}
+                    className="text-sm px-3 py-1 glass-effect rounded-full text-secondary hover:text-primary transition-colors"
+                    title="清空聊天记录"
+                  >
+                    清空记录
+                  </button>
+                )}
               </div>
               <form onSubmit={handleSettingsSubmit}>
                 <div className="mb-6">
@@ -220,6 +280,7 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
                       onChange={(e) => setOpenrouterApiKey(e.target.value)}
                       className="w-full px-4 py-3 border-0 rounded-lg focus:outline-none focus:ring-0 enhanced-input shadow-inner"
                       placeholder="输入您的 OpenRouter API 密钥"
+                      required
                     />
                   </div>
                   <p className="text-xs text-secondary mt-2">
@@ -281,12 +342,23 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           </div>
         </div>
-        <button
-          onClick={() => setShowSettings(true)}
-          className="p-3 text-secondary hover:text-primary rounded-xl glass-effect transition-all duration-300 hover-lift interactive"
-        >
-          <Settings size={20} />
-        </button>
+        <div className="flex items-center gap-2">
+          {chatState.messages.length > 0 && (
+            <button
+              onClick={clearMessages}
+              className="p-2 text-secondary hover:text-primary rounded-xl glass-effect transition-all duration-300 hover-lift interactive text-sm"
+              title="清空聊天记录"
+            >
+              清空
+            </button>
+          )}
+          <button
+            onClick={() => setShowSettings(true)}
+            className="p-3 text-secondary hover:text-primary rounded-xl glass-effect transition-all duration-300 hover-lift interactive"
+          >
+            <Settings size={20} />
+          </button>
+        </div>
       </div>
       
       {/* Messages */}
@@ -310,7 +382,15 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
                 <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm">!</span>
                 </div>
-                <p className="text-red-700 text-sm font-medium">{chatState.error}</p>
+                <div className="flex-1">
+                  <p className="text-red-700 text-sm font-medium">{chatState.error}</p>
+                  <button
+                    onClick={() => setShowSettings(true)}
+                    className="text-red-600 hover:text-red-800 text-xs underline mt-1"
+                  >
+                    检查设置
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -329,13 +409,24 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
       {showSettings && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="modal-gradient w-full max-w-md animate-slide-in-up">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                <Settings size={20} className="text-white" />
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <Settings size={20} className="text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-primary">
+                  API 设置
+                </h3>
               </div>
-              <h3 className="text-xl font-bold text-primary">
-                API 设置
-              </h3>
+              {chatState.messages.length > 0 && (
+                <button
+                  onClick={clearMessages}
+                  className="text-sm px-3 py-1 glass-effect rounded-full text-secondary hover:text-primary transition-colors"
+                  title="清空聊天记录"
+                >
+                  清空记录
+                </button>
+              )}
             </div>
             <form onSubmit={handleSettingsSubmit}>
               <div className="mb-6">
@@ -349,6 +440,7 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
                     onChange={(e) => setOpenrouterApiKey(e.target.value)}
                     className="w-full px-4 py-3 border-0 rounded-lg focus:outline-none focus:ring-0 enhanced-input shadow-inner"
                     placeholder="输入您的 OpenRouter API 密钥"
+                    required
                   />
                 </div>
                 <p className="text-xs text-secondary mt-2">
