@@ -26,18 +26,20 @@ function App() {
   };
 
   return (
-    <div className="h-screen flex bg-gray-100">
-      {/* 左侧对话区域 */}
-      <div className="w-1/2 bg-white border-r border-gray-200">
-        <Chat onDesignCardCreated={handleDesignCardCreated} />
-      </div>
-      
-      {/* 右侧设计稿画廊 */}
-      <div className="w-1/2 bg-white">
-        <DesignGallery 
-          designCards={designCards}
-          onCardClick={handleCardClick}
-        />
+    <div className="min-h-screen p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+      <div className="h-screen max-h-screen flex gap-4">
+        {/* 左侧对话区域 */}
+        <div className="w-1/2 modern-card hover-lift">
+          <Chat onDesignCardCreated={handleDesignCardCreated} />
+        </div>
+        
+        {/* 右侧设计稿画廊 */}
+        <div className="w-1/2 modern-card hover-lift">
+          <DesignGallery 
+            designCards={designCards}
+            onCardClick={handleCardClick}
+          />
+        </div>
       </div>
     </div>
   );

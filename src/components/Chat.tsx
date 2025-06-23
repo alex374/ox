@@ -3,7 +3,7 @@ import { Message, DesignCard, ChatState } from '../types';
 import { APIService } from '../services/api';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
-import { MessageCircle, Settings } from 'lucide-react';
+import { MessageCircle, Settings, Sparkles } from 'lucide-react';
 
 interface ChatProps {
   onDesignCardCreated?: (designCard: DesignCard) => void;
@@ -84,28 +84,47 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
     return (
       <div className="h-full flex flex-col">
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <MessageCircle size={64} className="text-blue-500 mb-4" />
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+          <div className="relative mb-6">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-2xl">
+              <Sparkles size={40} className="text-white" />
+            </div>
+            <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-br from-pink-500 to-red-500 rounded-full animate-pulse"></div>
+          </div>
+          
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-4">
             AI 设计师助手
           </h2>
-          <p className="text-gray-600 mb-6 max-w-md">
+          <p className="text-gray-600 mb-8 max-w-md text-lg">
             欢迎使用 AI 设计师助手！我可以帮您：
           </p>
-          <div className="text-left text-sm text-gray-600 space-y-2 mb-8">
-            <p>• 生成界面设计稿和原型</p>
-            <p>• 提供 UI/UX 设计建议</p>
-            <p>• 创建组件设计方案</p>
-            <p>• 分析设计趋势和最佳实践</p>
+          
+          <div className="grid grid-cols-2 gap-4 text-left text-sm text-gray-600 mb-8 max-w-lg">
+            <div className="glass-effect p-4 rounded-xl hover-lift">
+              <div className="font-semibold text-blue-600 mb-2">🎨 界面设计</div>
+              <p>生成精美的界面设计稿和原型</p>
+            </div>
+            <div className="glass-effect p-4 rounded-xl hover-lift">
+              <div className="font-semibold text-purple-600 mb-2">💡 设计建议</div>
+              <p>提供专业的 UI/UX 设计建议</p>
+            </div>
+            <div className="glass-effect p-4 rounded-xl hover-lift">
+              <div className="font-semibold text-pink-600 mb-2">🧩 组件设计</div>
+              <p>创建可复用的组件设计方案</p>
+            </div>
+            <div className="glass-effect p-4 rounded-xl hover-lift">
+              <div className="font-semibold text-indigo-600 mb-2">📊 趋势分析</div>
+              <p>分析设计趋势和最佳实践</p>
+            </div>
           </div>
           
           {!openrouterApiKey && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-              <p className="text-yellow-800 text-sm mb-2">
-                请先设置 API 密钥
+            <div className="glass-effect border-2 border-yellow-200 rounded-2xl p-6 mb-6 max-w-md">
+              <p className="text-gray-700 text-sm mb-4 font-medium">
+                🔑 请先设置 API 密钥以开始使用
               </p>
               <button
                 onClick={() => setShowSettings(true)}
-                className="flex items-center gap-2 px-3 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
+                className="flex items-center gap-2 px-6 py-3 btn-gradient text-white rounded-xl hover-lift font-medium shadow-lg"
               >
                 <Settings size={16} />
                 设置 API 密钥
@@ -122,51 +141,57 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
         
         {/* Settings Modal */}
         {showSettings && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-96">
-              <h3 className="text-lg font-semibold mb-4">API 设置</h3>
+          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="modal-gradient w-full max-w-md">
+              <h3 className="text-xl font-bold mb-6 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                🔧 API 设置
+              </h3>
               <form onSubmit={handleSettingsSubmit}>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="mb-6">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
                     OpenRouter API 密钥 (必需)
                   </label>
-                  <input
-                    type="password"
-                    value={openrouterApiKey}
-                    onChange={(e) => setOpenrouterApiKey(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="输入您的 OpenRouter API 密钥"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    用于聊天功能，您可以在 <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-blue-500">OpenRouter</a> 获取
+                  <div className="input-gradient-border">
+                    <input
+                      type="password"
+                      value={openrouterApiKey}
+                      onChange={(e) => setOpenrouterApiKey(e.target.value)}
+                      className="w-full px-4 py-3 border-0 rounded-lg focus:outline-none focus:ring-0 bg-white shadow-inner"
+                      placeholder="输入您的 OpenRouter API 密钥"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    用于聊天功能，您可以在 <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600 font-medium">OpenRouter</a> 获取
                   </p>
                 </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="mb-6">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
                     OpenAI API 密钥 (可选)
                   </label>
-                  <input
-                    type="password"
-                    value={openaiApiKey}
-                    onChange={(e) => setOpenaiApiKey(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="输入您的 OpenAI API 密钥"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    用于 DALL-E 图片生成，您可以在 <a href="https://platform.openai.com" target="_blank" rel="noopener noreferrer" className="text-blue-500">OpenAI Platform</a> 获取
+                  <div className="input-gradient-border">
+                    <input
+                      type="password"
+                      value={openaiApiKey}
+                      onChange={(e) => setOpenaiApiKey(e.target.value)}
+                      className="w-full px-4 py-3 border-0 rounded-lg focus:outline-none focus:ring-0 bg-white shadow-inner"
+                      placeholder="输入您的 OpenAI API 密钥"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    用于 DALL-E 图片生成，您可以在 <a href="https://platform.openai.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600 font-medium">OpenAI Platform</a> 获取
                   </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                    className="flex-1 px-6 py-3 btn-gradient text-white rounded-xl hover-lift font-medium shadow-lg"
                   >
-                    保存
+                    保存设置
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowSettings(false)}
-                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                    className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-300 font-medium"
                   >
                     取消
                   </button>
@@ -182,36 +207,43 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 bg-white flex items-center justify-between">
+      <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-white to-gray-50 flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-gray-900">AI 设计师助手</h1>
-          <p className="text-sm text-gray-600">
+          <h1 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+            AI 设计师助手
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
             {chatState.messages.length} 条消息
           </p>
         </div>
         <button
           onClick={() => setShowSettings(true)}
-          className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100"
+          className="p-3 text-gray-500 hover:text-gray-700 rounded-xl hover:bg-gray-100 transition-all duration-300 hover-lift"
         >
           <Settings size={20} />
         </button>
       </div>
       
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto bg-gray-50">
+      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 to-white">
         {chatState.messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
         ))}
         
         {chatState.isLoading && (
-          <div className="flex gap-3 p-4">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center">
-              <MessageCircle size={16} className="text-white" />
+          <div className="flex gap-4 p-6">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-700 flex items-center justify-center shadow-lg">
+              <MessageCircle size={18} className="text-white" />
             </div>
             <div className="flex-1">
-              <div className="inline-block p-3 rounded-lg bg-gray-100">
-                <div className="flex items-center gap-2">
-                  <div className="animate-pulse">正在思考...</div>
+              <div className="inline-block p-4 rounded-2xl chat-message-gradient bg-white shadow-xl">
+                <div className="flex items-center gap-3">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                    <div className="w-2 h-2 bg-gradient-to-r from-pink-500 to-red-600 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                  </div>
+                  <span className="text-gray-600">正在思考...</span>
                 </div>
               </div>
             </div>
@@ -219,9 +251,9 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
         )}
         
         {chatState.error && (
-          <div className="p-4">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-red-800 text-sm">{chatState.error}</p>
+          <div className="p-6">
+            <div className="glass-effect border-2 border-red-200 rounded-2xl p-4">
+              <p className="text-red-700 text-sm font-medium">{chatState.error}</p>
             </div>
           </div>
         )}
@@ -237,51 +269,57 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
       
       {/* Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96">
-            <h3 className="text-lg font-semibold mb-4">API 设置</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="modal-gradient w-full max-w-md">
+            <h3 className="text-xl font-bold mb-6 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+              🔧 API 设置
+            </h3>
             <form onSubmit={handleSettingsSubmit}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
                   OpenRouter API 密钥 (必需)
                 </label>
-                <input
-                  type="password"
-                  value={openrouterApiKey}
-                  onChange={(e) => setOpenrouterApiKey(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="输入您的 OpenRouter API 密钥"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  用于聊天功能，您可以在 <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-blue-500">OpenRouter</a> 获取
+                <div className="input-gradient-border">
+                  <input
+                    type="password"
+                    value={openrouterApiKey}
+                    onChange={(e) => setOpenrouterApiKey(e.target.value)}
+                    className="w-full px-4 py-3 border-0 rounded-lg focus:outline-none focus:ring-0 bg-white shadow-inner"
+                    placeholder="输入您的 OpenRouter API 密钥"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  用于聊天功能，您可以在 <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600 font-medium">OpenRouter</a> 获取
                 </p>
               </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
                   OpenAI API 密钥 (可选)
                 </label>
-                <input
-                  type="password"
-                  value={openaiApiKey}
-                  onChange={(e) => setOpenaiApiKey(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="输入您的 OpenAI API 密钥"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  用于 DALL-E 图片生成，您可以在 <a href="https://platform.openai.com" target="_blank" rel="noopener noreferrer" className="text-blue-500">OpenAI Platform</a> 获取
+                <div className="input-gradient-border">
+                  <input
+                    type="password"
+                    value={openaiApiKey}
+                    onChange={(e) => setOpenaiApiKey(e.target.value)}
+                    className="w-full px-4 py-3 border-0 rounded-lg focus:outline-none focus:ring-0 bg-white shadow-inner"
+                    placeholder="输入您的 OpenAI API 密钥"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  用于 DALL-E 图片生成，您可以在 <a href="https://platform.openai.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600 font-medium">OpenAI Platform</a> 获取
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                  className="flex-1 px-6 py-3 btn-gradient text-white rounded-xl hover-lift font-medium shadow-lg"
                 >
-                  保存
+                  保存设置
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowSettings(false)}
-                  className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                  className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-300 font-medium"
                 >
                   取消
                 </button>
