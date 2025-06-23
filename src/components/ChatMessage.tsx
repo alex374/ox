@@ -67,22 +67,24 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   };
 
   return (
-    <div className={`flex gap-3 p-4 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-      <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-        isUser ? 'bg-blue-500' : 'bg-gray-500'
+    <div className={`flex gap-4 p-6 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+      <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 ${
+        isUser 
+          ? 'bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg' 
+          : 'bg-gradient-to-br from-gray-500 to-gray-700 shadow-lg'
       }`}>
         {isUser ? (
-          <User size={16} className="text-white" />
+          <User size={18} className="text-white" />
         ) : (
-          <Bot size={16} className="text-white" />
+          <Bot size={18} className="text-white" />
         )}
       </div>
       
       <div className={`flex-1 max-w-3xl ${isUser ? 'text-right' : 'text-left'}`}>
-        <div className={`inline-block p-3 rounded-lg ${
+        <div className={`inline-block p-4 rounded-2xl transition-all duration-300 hover:scale-[1.02] ${
           isUser 
-            ? 'bg-blue-500 text-white' 
-            : 'bg-gray-100 text-gray-900'
+            ? 'user-message-gradient text-white' 
+            : 'chat-message-gradient bg-white text-gray-900 shadow-xl'
         }`}>
           <div className="whitespace-pre-wrap">
             {renderContent()}
@@ -90,12 +92,14 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         </div>
         
         {message.designCard && (
-          <div className="mt-3">
+          <div className="mt-4">
             <DesignCardComponent designCard={message.designCard} />
           </div>
         )}
         
-        <div className="text-xs text-gray-500 mt-1">
+        <div className={`text-xs mt-2 transition-opacity duration-300 ${
+          isUser ? 'text-gray-500' : 'text-gray-500'
+        }`}>
           {message.timestamp.toLocaleTimeString()}
         </div>
       </div>
