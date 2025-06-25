@@ -12,13 +12,12 @@ export class APIService {
   private openrouterApiKey: string;
   private openai: OpenAI | null = null;
 
-  constructor(openrouterApiKey?: string, openaiApiKey?: string) {
-    this.openrouterApiKey = openrouterApiKey || OPENROUTER_API_KEY || '';
+  constructor() {
+    this.openrouterApiKey = OPENROUTER_API_KEY || '';
     
-    const actualOpenaiKey = openaiApiKey || OPENAI_API_KEY;
-    if (actualOpenaiKey) {
+    if (OPENAI_API_KEY) {
       this.openai = new OpenAI({
-        apiKey: actualOpenaiKey,
+        apiKey: OPENAI_API_KEY,
         dangerouslyAllowBrowser: true
       });
     }
@@ -26,7 +25,7 @@ export class APIService {
 
   async sendMessage(message: string): Promise<APIResponse> {
     if (!this.openrouterApiKey) {
-      throw new Error('OpenRouter API key is required');
+      throw new Error('OpenRouter API key is required. Please set VITE_OPENROUTER_API_KEY in your .env file');
     }
 
     try {
@@ -78,8 +77,11 @@ export class APIService {
         message: assistantMessage,
         designCard
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('API Error:', error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        throw new Error('API key authentication failed. Please check your OpenRouter API key in .env file');
+      }
       throw new Error('Failed to communicate with AI service');
     }
   }

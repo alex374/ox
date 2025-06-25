@@ -1,36 +1,14 @@
-# AI Design Agent
+# AI 设计师助手
 
-一个基于 AI 的设计师助手应用，可以帮助用户生成设计稿和提供设计建议。
+这是一个基于人工智能的设计师助手应用，能够理解用户的设计需求并生成相应的设计稿。
 
 ## 功能特性
 
-- 🤖 AI 驱动的设计助手对话
-- 📝 支持 Markdown 格式的消息展示
-- 📊 支持 Mermaid 图表渲染
-- 🎨 自动生成设计稿卡片
-- 🖼️ 设计稿画廊展示
-- 🔧 可配置的 OpenRouter API 集成
-
-## 技术栈
-
-- **前端框架**: React + TypeScript + Vite
-- **样式**: Tailwind CSS
-- **AI API**: OpenRouter (支持 OpenAI GPT-4)
-- **Markdown 渲染**: react-markdown + remark-gfm
-- **图表渲染**: Mermaid
-- **图标**: Lucide React
-
-## 界面布局
-
-- **左侧**: 对话框区域
-  - 支持 Markdown 格式消息
-  - 支持 Mermaid 图表显示
-  - 显示对话中生成的设计稿卡片
-  
-- **右侧**: 设计稿画廊
-  - 仅展示生成的设计稿图片
-  - 网格布局展示
-  - 点击查看详情
+- 🤖 **智能对话**: 基于 OpenRouter API 的聊天功能
+- 🎨 **设计生成**: 使用 OpenAI DALL-E 生成设计稿图片
+- 📱 **响应式设计**: 支持各种屏幕尺寸
+- 💾 **设计稿管理**: 保存和查看生成的设计稿
+- 🔐 **安全配置**: API 密钥通过环境变量配置
 
 ## 快速开始
 
@@ -40,26 +18,30 @@
 npm install
 ```
 
-### 2. 配置环境变量
+### 2. 配置 API 密钥
 
-复制 `.env.example` 文件为 `.env`：
+复制环境变量配置文件：
 
 ```bash
 cp .env.example .env
 ```
 
-在 `.env` 文件中设置您的 OpenRouter API 密钥：
+在 `.env` 文件中设置您的 API 密钥：
 
 ```bash
+# OpenRouter API 密钥 (必需)
 VITE_OPENROUTER_API_KEY=your_actual_api_key_here
+
+# OpenAI API 密钥 (可选，用于 DALL-E 图片生成)
+VITE_OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 ### 3. 获取 OpenRouter API 密钥
 
 1. 访问 [OpenRouter](https://openrouter.ai)
-2. 注册账户
-3. 获取 API 密钥
-4. 将密钥添加到 `.env` 文件中
+2. 注册账户并登录
+3. 在仪表板中生成新的 API 密钥
+4. 将密钥复制到 `.env` 文件中
 
 ### 4. 启动开发服务器
 
@@ -69,94 +51,101 @@ npm run dev
 
 应用将在 `http://localhost:5173` 启动。
 
-### 5. 构建生产版本
+## 使用方法
 
-```bash
-npm run build
-```
-
-## 使用说明
-
-1. **设置 API 密钥**: 首次使用时，点击"设置 API 密钥"按钮输入您的 OpenRouter API 密钥
-2. **开始对话**: 在输入框中描述您的设计需求，如：
-   - "设计一个简洁的登录页面"
-   - "创建一个电商产品卡片组件"
-   - "设计一个移动端导航菜单"
-3. **查看设计稿**: AI 会根据您的需求生成设计建议，并在右侧画廊中展示相关的设计稿
-4. **支持 Markdown**: 您可以在对话中使用 Markdown 格式，包括 Mermaid 图表
-
-## 示例对话
-
-```
-用户: 设计一个用户注册流程图
-
-AI: 我来为您设计一个清晰的用户注册流程图：
-
-```mermaid
-graph TD
-    A[开始] --> B[用户访问注册页面]
-    B --> C[填写基本信息]
-    C --> D{信息验证}
-    D -->|验证失败| E[显示错误信息]
-    E --> C
-    D -->|验证成功| F[发送验证邮件]
-    F --> G[用户确认邮件]
-    G --> H[账户激活成功]
-    H --> I[跳转到登录页面]
-    I --> J[结束]
-```
-
-这个流程图展示了完整的用户注册过程...
-```
+1. **配置完成后即可开始使用**: 确保在 `.env` 文件中正确配置了 OpenRouter API 密钥
+2. **发送设计需求**: 在聊天界面输入您的设计需求，例如"设计一个移动端登录页面"
+3. **获取设计建议**: AI 助手会提供专业的设计建议和解决方案
+4. **查看设计稿**: 如果需求涉及具体设计，系统会自动生成设计稿
+5. **管理设计稿**: 在右侧画廊中查看和管理所有生成的设计稿
 
 ## 项目结构
 
 ```
-src/
-├── components/          # React 组件
-│   ├── Chat.tsx        # 主聊天组件
-│   ├── ChatInput.tsx   # 聊天输入组件
-│   ├── ChatMessage.tsx # 聊天消息组件
-│   ├── DesignCard.tsx  # 设计卡片组件
-│   └── DesignGallery.tsx # 设计画廊组件
-├── services/           # API 服务
-│   └── api.ts         # OpenRouter API 集成
-├── types/             # TypeScript 类型定义
-│   └── index.ts       # 主要类型定义
-├── App.tsx           # 主应用组件
-├── main.tsx          # 应用入口
-└── index.css         # 全局样式
+ox/
+├── src/
+│   ├── components/          # React 组件
+│   │   ├── Chat.tsx        # 聊天组件
+│   │   ├── ChatInput.tsx   # 输入组件
+│   │   ├── ChatMessage.tsx # 消息组件
+│   │   ├── DesignCard.tsx  # 设计稿卡片
+│   │   └── DesignGallery.tsx # 设计稿画廊
+│   ├── services/           # 服务层
+│   │   └── api.ts         # API 服务
+│   ├── types/             # 类型定义
+│   │   ├── index.ts       # 主要类型
+│   │   └── env.d.ts       # 环境变量类型
+│   ├── App.tsx            # 主应用组件
+│   ├── main.tsx           # 应用入口
+│   └── index.css          # 样式文件
+├── .env.example           # 环境变量示例
+├── package.json           # 项目配置
+└── README.md             # 项目说明
 ```
 
-## 开发说明
+## 技术栈
 
-### 添加新功能
+- **前端框架**: React 18 + TypeScript
+- **构建工具**: Vite
+- **样式**: Tailwind CSS
+- **图标**: Lucide React
+- **API 客户端**: Axios
+- **AI 服务**: 
+  - OpenRouter (聊天功能)
+  - OpenAI (图片生成)
 
-1. 在 `src/types/index.ts` 中定义新的类型
-2. 在 `src/components/` 中创建新组件
-3. 在 `src/services/api.ts` 中添加 API 功能
+## API 服务
 
-### 自定义样式
+### OpenRouter API
+- **用途**: 提供聊天和对话功能
+- **模型**: GPT-4.1-mini
+- **获取**: [https://openrouter.ai](https://openrouter.ai)
 
-项目使用 Tailwind CSS，您可以：
-1. 修改 `tailwind.config.js` 自定义主题
-2. 在 `src/index.css` 中添加全局样式
+### OpenAI API (可选)
+- **用途**: DALL-E 图片生成
+- **模型**: DALL-E 3
+- **获取**: [https://platform.openai.com](https://platform.openai.com)
+
+## 环境变量
+
+| 变量名 | 必需 | 说明 |
+|--------|------|------|
+| `VITE_OPENROUTER_API_KEY` | ✅ | OpenRouter API 密钥，用于聊天功能 |
+| `VITE_OPENAI_API_KEY` | ❌ | OpenAI API 密钥，用于图片生成 |
 
 ## 常见问题
 
 ### Q: API 密钥无效
-A: 请确保在 OpenRouter 网站上获取了有效的 API 密钥，并正确设置在环境变量中。
+A: 请确保在 OpenRouter 网站上获取了有效的 API 密钥，并正确设置在 `.env` 文件中。
 
-### Q: 设计稿不显示
-A: 目前使用模拟图片数据，实际应用中可以集成图片生成 API（如 DALL-E、Midjourney API）。
+### Q: 图片生成失败
+A: 如果没有配置 OpenAI API 密钥，系统会使用高质量的模拟图片作为备选方案。
 
-### Q: Mermaid 图表不显示
-A: 确保图表语法正确，并检查浏览器控制台是否有错误信息。
+### Q: 聊天功能不可用
+A: 请检查：
+1. OpenRouter API 密钥是否正确配置
+2. 网络连接是否正常
+3. API 密钥是否有足够的额度
+
+## 开发命令
+
+```bash
+# 安装依赖
+npm install
+
+# 启动开发服务器
+npm run dev
+
+# 构建生产版本
+npm run build
+
+# 预览生产版本
+npm run preview
+
+# 代码检查
+npm run lint
+```
 
 ## 许可证
 
 MIT License
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！
