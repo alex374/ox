@@ -24,7 +24,7 @@ export class APIService {
     }
   }
 
-  async sendMessage(message: string): Promise<APIResponse> {
+  async sendMessage(message: string, signal?: AbortSignal): Promise<APIResponse> {
     if (!this.openrouterApiKey) {
       throw new Error('OpenRouter API key is required');
     }
@@ -60,7 +60,8 @@ export class APIService {
             'Content-Type': 'application/json',
             'HTTP-Referer': 'http://localhost:5173',
             'X-Title': 'AI Design Agent'
-          }
+          },
+          signal
         }
       );
 

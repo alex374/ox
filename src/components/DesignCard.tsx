@@ -5,9 +5,11 @@ import { Calendar, Eye, Sparkles, Heart, Download, Share2, MoreHorizontal } from
 interface DesignCardProps {
   designCard: DesignCard;
   onClick?: () => void;
+  showCheckbox?: boolean;
+  isSelected?: boolean;
 }
 
-const DesignCardComponent: React.FC<DesignCardProps> = ({ designCard, onClick }) => {
+const DesignCardComponent: React.FC<DesignCardProps> = ({ designCard, onClick, showCheckbox = false, isSelected = false }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -63,13 +65,32 @@ const DesignCardComponent: React.FC<DesignCardProps> = ({ designCard, onClick })
         {/* 悬浮时的渐变覆盖层 */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         
-        {/* 顶部操作栏 */}
-        <div className="absolute top-3 left-3 right-3 flex justify-between items-start opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-y-0 translate-y-2">
-          <div className="flex gap-2">
-            <div className="px-2 py-1 bg-white/90 backdrop-blur-sm text-xs font-medium text-gray-700 rounded-full">
-              AI 生成
+                  {/* 选择框 */}
+          {showCheckbox && (
+            <div className="absolute top-3 left-3 z-10">
+              <div className={`w-6 h-6 rounded-lg border-2 transition-all duration-200 backdrop-blur-sm ${
+                isSelected 
+                  ? 'bg-purple-500 border-purple-500' 
+                  : 'bg-white/80 border-gray-300 hover:border-purple-400'
+              }`}>
+                {isSelected && (
+                  <svg className="w-4 h-4 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* 顶部操作栏 */}
+          <div className={`absolute top-3 ${showCheckbox ? 'left-12' : 'left-3'} right-3 flex justify-between items-start opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-y-0 translate-y-2`}>
+            <div className="flex gap-2">
+              {!showCheckbox && (
+                <div className="px-2 py-1 bg-white/90 backdrop-blur-sm text-xs font-medium text-gray-700 rounded-full">
+                  AI 生成
+                </div>
+              )}
+            </div>
           
           <div className="flex gap-1">
             <button

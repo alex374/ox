@@ -5,9 +5,19 @@ interface ChatInputProps {
   onSendMessage: (message: string) => void;
   disabled?: boolean;
   isLoading?: boolean;
+  messageHistory?: string[];
+  historyIndex?: number;
+  onHistoryIndexChange?: (index: number) => void;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled, isLoading }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ 
+  onSendMessage, 
+  disabled, 
+  isLoading, 
+  messageHistory = [], 
+  historyIndex = -1, 
+  onHistoryIndexChange 
+}) => {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -32,6 +42,36 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled, isLoadin
       handleSubmit(e);
     }
   };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // 历史记录导航
+    if (e.key === 'ArrowUp' && messageHistory.length > 0) {
+      e.preventDefault();
+      const newIndex = Math.min(historyIndex + 1, messageHistory.length - 1);
+      onHistoryIndexChange?.(newIndex);
+      setMessage(messageHistory[newIndex] || '');
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIndex > 0) {
+        const newIndex = historyIndex - 1;
+        onHistoryIndexChange?.(newIndex);
+        setMessage(messageHistory[newIndex] || '');
+      } else if (historyIndex === 0) {
+        onHistoryIndexChange?.(-1);
+        setMessage('');
+      }
+    }
+  };
+
+  // 监听全局焦点事件
+  useEffect(() => {
+    const handleFocusInput = () => {
+      textareaRef.current?.focus();
+    };
+
+    window.addEventListener('focusInput', handleFocusInput);
+    return () => window.removeEventListener('focusInput', handleFocusInput);
+  }, []);
 
   // 自动调整文本框高度
   const adjustTextareaHeight = () => {
@@ -96,18 +136,19 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled, isLoadin
           <div className={`flex-1 input-gradient-border transition-all duration-300 ${
             isFocused ? 'shadow-lg shadow-purple-500/20' : ''
           }`}>
-            <textarea
-              ref={textareaRef}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              placeholder="描述您的设计需求，比如：'设计一个简洁的登录页面' 或 '创建一个电商产品卡片组件'"
-              className="w-full resize-none border-0 rounded-lg px-4 py-3 focus:outline-none focus:ring-0 bg-white/95 backdrop-blur-sm shadow-inner transition-all duration-300 placeholder:text-gray-400 text-gray-800 min-h-[48px] max-h-[120px]"
-              disabled={disabled || isLoading}
-              style={{ height: 'auto' }}
-            />
+                         <textarea
+               ref={textareaRef}
+               value={message}
+               onChange={(e) => setMessage(e.target.value)}
+               onKeyPress={handleKeyPress}
+               onKeyDown={handleKeyDown}
+               onFocus={() => setIsFocused(true)}
+               onBlur={() => setIsFocused(false)}
+               placeholder="描述您的设计需求，比如：'设计一个简洁的登录页面' 或 '创建一个电商产品卡片组件'"
+               className="w-full resize-none border-0 rounded-lg px-4 py-3 focus:outline-none focus:ring-0 bg-white/95 backdrop-blur-sm shadow-inner transition-all duration-300 placeholder:text-gray-400 text-gray-800 min-h-[48px] max-h-[120px]"
+               disabled={disabled || isLoading}
+               style={{ height: 'auto' }}
+             />
             
             {/* 字符计数 */}
             {message.length > 100 && (
