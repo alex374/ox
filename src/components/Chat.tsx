@@ -84,51 +84,91 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
     return (
       <div className="h-full flex flex-col">
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <div className="relative mb-6">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-2xl">
-              <Sparkles size={40} className="text-white" />
+          <div className="relative mb-8">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-2xl animate-bounceIn">
+              <Sparkles size={48} className="text-white" />
             </div>
-            <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-br from-pink-500 to-red-500 rounded-full animate-pulse"></div>
+            <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-br from-pink-500 to-red-500 rounded-full animate-pulse"></div>
+            <div className="absolute -bottom-2 -left-2 w-6 h-6 bg-yellow-400 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+            <div className="absolute top-1/4 -left-4 w-4 h-4 bg-green-400 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
           </div>
           
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-4">
+          <h2 className="text-3xl font-bold gradient-text mb-4">
             AI 设计师助手
           </h2>
-          <p className="text-gray-600 mb-8 max-w-md text-lg">
-            欢迎使用 AI 设计师助手！我可以帮您：
+          <p className="text-gray-600 mb-8 max-w-md text-lg leading-relaxed">
+            欢迎使用 AI 设计师助手！我可以帮您创造出色的设计作品
           </p>
           
           <div className="grid grid-cols-2 gap-4 text-left text-sm text-gray-600 mb-8 max-w-lg">
-            <div className="glass-effect p-4 rounded-xl hover-lift">
-              <div className="font-semibold text-blue-600 mb-2">🎨 界面设计</div>
+            <div className="glass-effect p-4 rounded-xl hover-lift-subtle cursor-pointer group">
+              <div className="font-semibold text-blue-600 mb-2 flex items-center gap-2">
+                🎨 
+                <span className="group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">界面设计</span>
+              </div>
               <p>生成精美的界面设计稿和原型</p>
             </div>
-            <div className="glass-effect p-4 rounded-xl hover-lift">
-              <div className="font-semibold text-purple-600 mb-2">💡 设计建议</div>
+            <div className="glass-effect p-4 rounded-xl hover-lift-subtle cursor-pointer group">
+              <div className="font-semibold text-purple-600 mb-2 flex items-center gap-2">
+                💡 
+                <span className="group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-pink-600 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">设计建议</span>
+              </div>
               <p>提供专业的 UI/UX 设计建议</p>
             </div>
-            <div className="glass-effect p-4 rounded-xl hover-lift">
-              <div className="font-semibold text-pink-600 mb-2">🧩 组件设计</div>
+            <div className="glass-effect p-4 rounded-xl hover-lift-subtle cursor-pointer group">
+              <div className="font-semibold text-pink-600 mb-2 flex items-center gap-2">
+                🧩 
+                <span className="group-hover:bg-gradient-to-r group-hover:from-pink-600 group-hover:to-red-600 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">组件设计</span>
+              </div>
               <p>创建可复用的组件设计方案</p>
             </div>
-            <div className="glass-effect p-4 rounded-xl hover-lift">
-              <div className="font-semibold text-indigo-600 mb-2">📊 趋势分析</div>
+            <div className="glass-effect p-4 rounded-xl hover-lift-subtle cursor-pointer group">
+              <div className="font-semibold text-indigo-600 mb-2 flex items-center gap-2">
+                📊 
+                <span className="group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-blue-600 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">趋势分析</span>
+              </div>
               <p>分析设计趋势和最佳实践</p>
             </div>
           </div>
           
           {!openrouterApiKey && (
-            <div className="glass-effect border-2 border-yellow-200 rounded-2xl p-6 mb-6 max-w-md">
-              <p className="text-gray-700 text-sm mb-4 font-medium">
-                🔑 请先设置 API 密钥以开始使用
-              </p>
+            <div className="glass-effect border-2 border-yellow-200/50 rounded-2xl p-6 mb-6 max-w-md backdrop-blur-lg animate-fadeInUp">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm">🔑</span>
+                </div>
+                <p className="text-gray-700 text-sm font-medium">
+                  请先设置 API 密钥以开始使用
+                </p>
+              </div>
               <button
                 onClick={() => setShowSettings(true)}
-                className="flex items-center gap-2 px-6 py-3 btn-gradient text-white rounded-xl hover-lift font-medium shadow-lg"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 btn-gradient text-white rounded-xl hover-lift font-medium shadow-lg"
               >
                 <Settings size={16} />
                 设置 API 密钥
               </button>
+            </div>
+          )}
+          
+          {openrouterApiKey && (
+            <div className="glass-effect rounded-2xl p-4 max-w-md animate-fadeInUp">
+              <p className="text-sm text-gray-600 mb-3">💡 快速开始，试试这些示例：</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "设计一个登录页面",
+                  "创建按钮组件",
+                  "设计仪表板"
+                ].map((example, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {/* 可以添加快速填充功能 */}}
+                    className="text-xs px-3 py-1.5 bg-white/50 text-purple-600 rounded-full hover:bg-white/70 transition-colors duration-200"
+                  >
+                    {example}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -139,7 +179,6 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
           isLoading={chatState.isLoading}
         />
         
-        {/* Settings Modal */}
         {showSettings && (
           <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="modal-gradient w-full max-w-md">
@@ -267,7 +306,6 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
         isLoading={chatState.isLoading}
       />
       
-      {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="modal-gradient w-full max-w-md">
