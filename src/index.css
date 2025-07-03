@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CSS变量用于主题支持 */
+:root {
+  --color-primary: #667eea;
+  --color-secondary: #764ba2;
+  --color-accent: #f093fb;
+  --color-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color-surface: rgba(255, 255, 255, 0.95);
+  --color-text: #1f2937;
+  --color-text-secondary: #6b7280;
+  --color-border: rgba(255, 255, 255, 0.2);
+  --color-gradient: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #f5576c);
+  --effect-blur: blur(20px);
+  --effect-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --effect-glow: 0 0 30px rgba(102, 126, 234, 0.3);
+}
+
 /* 基础样式优化 */
 body {
   margin: 0;
@@ -234,16 +250,39 @@ body {
   background: transparent;
 }
 
-/* 现代化卡片效果 */
+/* 主题适配的现代化卡片效果 */
 .modern-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
+  background: var(--color-surface);
+  backdrop-filter: var(--effect-blur);
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 8px 16px rgba(0, 0, 0, 0.1),
-    0 16px 32px rgba(102, 126, 234, 0.1);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--effect-shadow);
+  color: var(--color-text);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 主题适配的按钮样式 */
+.theme-button {
+  background: var(--color-primary);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.theme-button:hover {
+  background: var(--color-secondary);
+  box-shadow: var(--effect-glow);
+}
+
+/* 主题适配的输入框 */
+.theme-input {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.theme-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary), 0.1);
 }
 
 /* 加载动画 */
