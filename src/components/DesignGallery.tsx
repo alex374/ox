@@ -1,6 +1,7 @@
 import React from 'react';
 import { DesignCard } from '../types';
 import DesignCardComponent from './DesignCard';
+import { useResponsive } from '../hooks/useResponsive';
 import { ImageIcon, Sparkles } from 'lucide-react';
 
 interface DesignGalleryProps {
@@ -9,6 +10,8 @@ interface DesignGalleryProps {
 }
 
 const DesignGallery: React.FC<DesignGalleryProps> = ({ designCards, onCardClick }) => {
+  const { isMobile } = useResponsive();
+  
   if (designCards.length === 0) {
     return (
       <div className="h-full flex flex-col items-center justify-center p-8">
@@ -62,14 +65,15 @@ const DesignGallery: React.FC<DesignGalleryProps> = ({ designCards, onCardClick 
       </div>
       
       {/* Gallery */}
-      <div className="flex-1 p-6 overflow-y-auto bg-gradient-to-b from-gray-50 to-white">
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {designCards.map((designCard) => (
-            <DesignCardComponent
-              key={designCard.id}
-              designCard={designCard}
-              onClick={() => onCardClick?.(designCard)}
-            />
+      <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+        <div className={`responsive-grid ${isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2 xl:grid-cols-3'}`} role="grid" aria-label="设计稿画廊">
+          {designCards.map((designCard, index) => (
+            <div key={designCard.id} role="gridcell" className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+              <DesignCardComponent
+                designCard={designCard}
+                onClick={() => onCardClick?.(designCard)}
+              />
+            </div>
           ))}
         </div>
       </div>
