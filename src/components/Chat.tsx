@@ -3,7 +3,9 @@ import { Message, DesignCard, ChatState } from '../types';
 import { APIService } from '../services/api';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
-import { MessageCircle, Settings, Sparkles } from 'lucide-react';
+import { useKeyboardShortcuts, SHORTCUTS } from '../hooks/useKeyboardShortcuts';
+import { useResponsive } from '../hooks/useResponsive';
+import { MessageCircle, Settings, Sparkles, RotateCcw } from 'lucide-react';
 
 interface ChatProps {
   onDesignCardCreated?: (designCard: DesignCard) => void;
@@ -20,6 +22,7 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
   const [openaiApiKey, setOpenaiApiKey] = useState<string>('');
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { isMobile } = useResponsive();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -80,6 +83,21 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
     setShowSettings(false);
   };
 
+  const handleNewChat = () => {
+    setChatState({
+      messages: [],
+      isLoading: false,
+      error: null
+    });
+  };
+
+  // 键盘快捷键
+  useKeyboardShortcuts({
+    [SHORTCUTS.NEW_CHAT]: handleNewChat,
+    [SHORTCUTS.SETTINGS]: () => setShowSettings(true),
+    [SHORTCUTS.ESCAPE]: () => setShowSettings(false),
+  });
+
   if (chatState.messages.length === 0) {
     return (
       <div className="h-full flex flex-col">
@@ -118,13 +136,14 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
           </div>
           
           {!openrouterApiKey && (
-            <div className="glass-effect border-2 border-yellow-200 rounded-2xl p-6 mb-6 max-w-md">
-              <p className="text-gray-700 text-sm mb-4 font-medium">
+            <div className="glass-effect border-2 border-yellow-200 dark:border-yellow-500/30 rounded-2xl p-6 mb-6 max-w-md animate-slide-up">
+              <p className="text-gray-700 dark:text-gray-300 text-sm mb-4 font-medium">
                 🔑 请先设置 API 密钥以开始使用
               </p>
               <button
                 onClick={() => setShowSettings(true)}
-                className="flex items-center gap-2 px-6 py-3 btn-gradient text-white rounded-xl hover-lift font-medium shadow-lg"
+                className="flex items-center gap-2 px-6 py-3 btn-gradient text-white rounded-xl hover-lift font-medium shadow-lg focus-visible"
+                aria-label="设置 API 密钥"
               >
                 <Settings size={16} />
                 设置 API 密钥
@@ -207,27 +226,41 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-white to-gray-50 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+      <div className="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 flex items-center justify-between transition-colors duration-300">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent truncate">
             AI 设计师助手
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
             {chatState.messages.length} 条消息
           </p>
         </div>
-        <button
-          onClick={() => setShowSettings(true)}
-          className="p-3 text-gray-500 hover:text-gray-700 rounded-xl hover:bg-gray-100 transition-all duration-300 hover-lift"
-        >
-          <Settings size={20} />
-        </button>
+        <div className="flex gap-2">
+          {chatState.messages.length > 0 && (
+            <button
+              onClick={handleNewChat}
+              className="p-2 sm:p-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 hover-lift focus-visible"
+              aria-label="新建对话"
+            >
+              <RotateCcw size={isMobile ? 16 : 20} />
+            </button>
+          )}
+          <button
+            onClick={() => setShowSettings(true)}
+            className="p-2 sm:p-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 hover-lift focus-visible"
+            aria-label="设置"
+          >
+            <Settings size={isMobile ? 16 : 20} />
+          </button>
+        </div>
       </div>
       
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 to-white">
-        {chatState.messages.map((message) => (
-          <ChatMessage key={message.id} message={message} />
+      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+        {chatState.messages.map((message, index) => (
+          <div key={message.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+            <ChatMessage message={message} />
+          </div>
         ))}
         
         {chatState.isLoading && (
@@ -251,9 +284,9 @@ const Chat: React.FC<ChatProps> = ({ onDesignCardCreated }) => {
         )}
         
         {chatState.error && (
-          <div className="p-6">
-            <div className="glass-effect border-2 border-red-200 rounded-2xl p-4">
-              <p className="text-red-700 text-sm font-medium">{chatState.error}</p>
+          <div className="p-4 sm:p-6 animate-slide-up">
+            <div className="glass-effect border-2 border-red-200 dark:border-red-500/30 rounded-2xl p-4">
+              <p className="text-red-700 dark:text-red-400 text-sm font-medium">{chatState.error}</p>
             </div>
           </div>
         )}
